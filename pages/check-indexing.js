@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export default function CheckIndexing() {
@@ -28,7 +27,6 @@ export default function CheckIndexing() {
     setLoading(false);
   };
 
-  // Poll every 5 seconds to update status
   useEffect(() => {
     if (!taskId) return;
     const interval = setInterval(async () => {
@@ -38,11 +36,12 @@ export default function CheckIndexing() {
         body: JSON.stringify({ task_id: taskId }),
       });
       const data = await res.json();
-      if (data.status?.status === 'completed') {
-        setStatus(data.status);
+      setStatus(data.status);
+      if (data.status?.status === 'completed' || data.status?.status === 'error') {
         clearInterval(interval);
       }
     }, 5000);
+
     return () => clearInterval(interval);
   }, [taskId]);
 
@@ -85,11 +84,11 @@ export default function CheckIndexing() {
               <div
                 key={idx}
                 className={
-  "p-3 rounded border " +
-  (item.indexed
-    ? "bg-green-100 border-green-400 text-green-800"
-    : "bg-red-100 border-red-400 text-red-800")
-}
+                  "p-3 rounded border " +
+                  (item.indexed
+                    ? "bg-green-100 border-green-400 text-green-800"
+                    : "bg-red-100 border-red-400 text-red-800")
+                }
               >
                 <p className="text-sm">
                   <strong>{item.url}</strong>: {item.indexed ? '✅ Indexed' : '❌ Not Indexed'}
@@ -97,6 +96,10 @@ export default function CheckIndexing() {
               </div>
             ))}
           </div>
+        )}
+
+        {status && !status.result && (
+          <div className="mt-4 text-gray-600">⏳ Waiting for indexing results...</div>
         )}
       </div>
     </main>
