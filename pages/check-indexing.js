@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function CheckIndexing() {
   const [urls, setUrls] = useState('');
@@ -10,8 +10,8 @@ export default function CheckIndexing() {
   const handleCheck = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTaskId(null);
     setStatus(null);
+    setTaskId(null);
 
     const res = await fetch('/api/check-indexing', {
       method: 'POST',
@@ -27,6 +27,24 @@ export default function CheckIndexing() {
     setStatus(data.status || null);
     setLoading(false);
   };
+
+  // Poll every 5 seconds to update status
+  useEffect(() => {
+    if (!taskId) return;
+    const interval = setInterval(async () => {
+      const res = await fetch('/api/check-indexing-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_id: taskId }),
+      });
+      const data = await res.json();
+      if (data.status?.status === 'completed') {
+        setStatus(data.status);
+        clearInterval(interval);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [taskId]);
 
   return (
     <main className="min-h-screen bg-gray-100 py-10 px-4">
@@ -57,7 +75,24 @@ export default function CheckIndexing() {
         {taskId && (
           <div className="mt-6 text-sm text-gray-700">
             <p><strong>Task ID:</strong> {taskId}</p>
-            {status && <pre className="mt-2">{JSON.stringify(status, null, 2)}</pre>}
+          </div>
+        )}
+
+        {status?.result && (
+          <div className="mt-6 space-y-2">
+            <h2 className="text-lg font-semibold text-gray-800">Indexing Results:</h2>
+            {status.result.map((item, idx) => (
+              <div
+                key={idx}
+                className={\`p-3 rounded border \${item.indexed
+                  ? 'bg-green-100 border-green-400 text-green-800'
+                  : 'bg-red-100 border-red-400 text-red-800'}\`}
+              >
+                <p className="text-sm">
+                  <strong>{item.url}</strong>: {item.indexed ? '✅ Indexed' : '❌ Not Indexed'}
+                </p>
+              </div>
+            ))}
           </div>
         )}
       </div>
