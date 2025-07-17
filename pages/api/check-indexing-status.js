@@ -1,4 +1,3 @@
-
 export default async function handler(req, res) {
   const { task_id } = req.body;
   const apiKey = process.env.DEFAULT_API_KEY;
@@ -19,6 +18,6 @@ export default async function handler(req, res) {
       status: statusData.result ? statusData.result[0] : null
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to get status', details: err.message });
+    res.status(500).json({ error: 'Failed to check status', details: err.message });
   }
 }
