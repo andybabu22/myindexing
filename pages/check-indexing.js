@@ -84,9 +84,12 @@ export default function CheckIndexing() {
             {status.result.map((item, idx) => (
               <div
                 key={idx}
-                className={\`p-3 rounded border \${item.indexed
-                  ? 'bg-green-100 border-green-400 text-green-800'
-                  : 'bg-red-100 border-red-400 text-red-800'}\`}
+                className={
+  "p-3 rounded border " +
+  (item.indexed
+    ? "bg-green-100 border-green-400 text-green-800"
+    : "bg-red-100 border-red-400 text-red-800")
+}
               >
                 <p className="text-sm">
                   <strong>{item.url}</strong>: {item.indexed ? '✅ Indexed' : '❌ Not Indexed'}
