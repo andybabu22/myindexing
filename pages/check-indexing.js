@@ -28,22 +28,28 @@ export default function CheckIndexing() {
   };
 
   useEffect(() => {
-    if (!taskId) return;
-    const interval = setInterval(async () => {
-      const res = await fetch('/api/check-indexing-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task_id: taskId }),
-      });
-      const data = await res.json();
-      setStatus(data.status);
-      if (Array.isArray(data.status?.result) && data.status.result.length > 0) {
-        clearInterval(interval);
-      }
-    }, 5000);
+  if (!taskId) return;
 
-    return () => clearInterval(interval);
-  }, [taskId]);
+  const interval = setInterval(async () => {
+    const res = await fetch('/api/check-indexing-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task_id: taskId }),
+    });
+
+    const data = await res.json();
+    
+    // FIX: check data.result instead of data.status.result
+    if (Array.isArray(data.result) && data.result.length > 0) {
+      setStatus({ result: data.result });
+      clearInterval(interval);
+    } else {
+      console.log("Waiting for indexing results...");
+    }
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, [taskId]);
 
   const downloadCSV = () => {
     if (!status?.result) return;
