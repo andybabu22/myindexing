@@ -37,7 +37,7 @@ export default function CheckIndexing() {
       });
       const data = await res.json();
       setStatus(data.status);
-      if (data.status?.status !== 'running') {
+      if (Array.isArray(data.status?.result) && data.status.result.length > 0) {
   clearInterval(interval);
 }
     }, 5000);
