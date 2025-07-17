@@ -23,7 +23,7 @@ export default function CheckIndexing() {
 
     const data = await res.json();
     setTaskId(data.task_id);
-    setStatus(data.status || null);
+    setStatus(null);
     setLoading(false);
   };
 
@@ -38,12 +38,25 @@ export default function CheckIndexing() {
       const data = await res.json();
       setStatus(data.status);
       if (Array.isArray(data.status?.result) && data.status.result.length > 0) {
-  clearInterval(interval);
-}
+        clearInterval(interval);
+      }
     }, 5000);
 
     return () => clearInterval(interval);
   }, [taskId]);
+
+  const downloadCSV = () => {
+    if (!status?.result) return;
+
+    const header = "URL,Indexed\n";
+    const rows = status.result.map(item => `${item.url},${item.indexed}`);
+    const csvContent = header + rows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'indexing-results.csv';
+    link.click();
+  };
 
   return (
     <main className="min-h-screen bg-gray-100 py-10 px-4">
@@ -78,8 +91,16 @@ export default function CheckIndexing() {
         )}
 
         {Array.isArray(status?.result) && status.result.length > 0 && (
-  <div className="mt-6 space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">Indexing Results:</h2>
+          <div className="mt-6 space-y-2">
+            <h2 className="text-lg font-semibold text-gray-800 flex justify-between">
+              Indexing Results
+              <button
+                onClick={downloadCSV}
+                className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+              >
+                Download CSV
+              </button>
+            </h2>
             {status.result.map((item, idx) => (
               <div
                 key={idx}
