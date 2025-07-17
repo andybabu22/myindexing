@@ -77,8 +77,8 @@ export default function CheckIndexing() {
           </div>
         )}
 
-        {status?.result && (
-          <div className="mt-6 space-y-2">
+        {Array.isArray(status?.result) && status.result.length > 0 && (
+  <div className="mt-6 space-y-2">
             <h2 className="text-lg font-semibold text-gray-800">Indexing Results:</h2>
             {status.result.map((item, idx) => (
               <div
