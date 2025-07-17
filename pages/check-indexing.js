@@ -37,9 +37,9 @@ export default function CheckIndexing() {
       });
       const data = await res.json();
       setStatus(data.status);
-      if (data.status?.status === 'completed' || data.status?.status === 'error') {
-        clearInterval(interval);
-      }
+      if (data.status?.status !== 'running') {
+  clearInterval(interval);
+}
     }, 5000);
 
     return () => clearInterval(interval);
